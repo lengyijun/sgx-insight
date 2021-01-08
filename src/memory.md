@@ -21,3 +21,20 @@ classDiagram
       }
 ```
 
+## Q1： 如何从一个虚拟地址找到一个页？
+
+用radix tree
+
+radix tree类似于trie. 功能是高效的实现key是整数（int,long long）的map.
+
+在内核中，radix tree用来记录缓存。一个大文件可能一部分已经缓存到内存中了，但是这个记录（偏移量->page）该怎么维护？就是用radix tree的
+
+在linux-sgx-driver中，radix tree的功能是从虚拟地址找到一个页（address->sgx_encl_page）。
+
+当一个EPC被交换出去时，radix tree并不会删除条目。所以当一个页被交换进来时，radix tree一定会有这个条目
+
+
+
+------
+
+当一个页被交换出去时，sgx_encl_page内的epc_page指针会变成NULL

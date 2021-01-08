@@ -43,3 +43,7 @@ linux-sgx-driver 本质上就是响应 ioctl 的handler. 注意发起ioctl只能
 - EPC空闲页的管理
 - EPC的swap in/out
 - EPC的page fault handler
+
+
+
+编译完新的 `/dev/isgx` 后，重启一下 aesmd.service才能用
