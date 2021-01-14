@@ -19,7 +19,7 @@ sudo apt install build-essential ocaml ocamlbuild automake autoconf libtool wget
 ## Driver install
 from the following link
 ```link
-https://github.com/intel/linux-sgx-driver
+git clone https://github.com/intel/linux-sgx-driver --depth=1
 ```
 
 ## sdk install
@@ -57,7 +57,7 @@ deb [trusted=yes arch=amd64] file:/home/lyj/linux-sgx-sgx_2.10/linux/installer/d
 if it is Ubuntu 18.04, change `focal` to `bionic`
 ```bash
 sudo apt update
-sudo apt install --reinstall libsgx-ae-epid libsgx-ae-le libsgx-ae-pce libsgx-ae-qe3 libsgx-ae-qve libsgx-aesm-ecdsa-plugin libsgx-aesm-epid-plugin libsgx-aesm-launch-plugin libsgx-aesm-pce-plugin libsgx-aesm-quote-ex-plugin libsgx-dcap-default-qpl-dev libsgx-dcap-default-qpl libsgx-dcap-ql-dev libsgx-dcap-ql libsgx-enclave-common-dbgsym libsgx-enclave-common-dev libsgx-enclave-common libsgx-epid-dev libsgx-epid libsgx-launch-dev libsgx-launch libsgx-pce-logic libsgx-qe3-logic libsgx-quote-ex-dev libsgx-quote-ex libsgx-uae-service libsgx-urts-dbgsym libsgx-urts sgx-aesm-service libsgx-dcap-quote-verify 
+sudo apt install --reinstall libsgx-ae-epid libsgx-ae-le libsgx-ae-pce libsgx-ae-qe3 libsgx-ae-qve libsgx-aesm-ecdsa-plugin libsgx-aesm-epid-plugin libsgx-aesm-launch-plugin libsgx-aesm-pce-plugin libsgx-aesm-quote-ex-plugin libsgx-dcap-default-qpl-dev libsgx-dcap-default-qpl libsgx-dcap-ql-dev libsgx-dcap-ql libsgx-enclave-common-dbgsym libsgx-enclave-common-dev libsgx-enclave-common libsgx-epid-dev libsgx-epid libsgx-launch-dev libsgx-launch libsgx-pce-logic libsgx-qe3-logic libsgx-quote-ex-dev libsgx-quote-ex libsgx-uae-service libsgx-urts-dbgsym libsgx-urts sgx-aesm-service libsgx-dcap-quote-verify libsgx-headers
 ```
 
 ```bash
