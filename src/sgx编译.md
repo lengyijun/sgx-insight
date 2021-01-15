@@ -66,44 +66,6 @@ sudo apt install sgx-dcap-pccs
 ```
 
 
-
-## build sgx-gdb
-
-sgx-gdb依赖老版本的gdb. 
-
-download gdb-9.1
-
-```bash
-wget https://ftp.gnu.org/gnu/gdb/gdb-9.1.tar.xz
-extract gdb-9.1.tar.xz
-cd gdb-9.1
-mkdir build
-cd build 
-../configure --with-python=/usr/bin/python3 --prefix=/opt/gdb-9.1
-make
-sudo make install
-```
-modify `which sgx-gdb` , redirect GDB to /opt/gdb-9.1/bin/gdb
-
-## test
-```bash
-cd ~/linux-sgx-sgx_2.10/SampleCode/SampleEnclave
-make clean && make
-sgx-gdb ./app
-
-set debug-file-directory /usr/lib/debug
-enable sgx_emmt
-run
-```
-
-you should see when finished
-```
-  [Peak stack used]: 15 KB
-  [Peak heap used]:  12 KB
-  [Peak reserved memory used]:  0 KB
-
-```
-
 ## After installation
 
 ```
@@ -116,3 +78,25 @@ linux-sgx需要特定的as ld ld.gold文件，并且没有提供源码，导致�
 intel只提供了ubuntu LTS版本的binary,即18.04 20.04。 
 对于20.10这种非LTS,目前难以安装sgx环境
 至于Arch,那就更不用想了
+
+kubuntu是ubuntu官方维护的kde版本，也能安装sgx.但是kubuntu内核版本太低了，而且我遇到过奇怪的问题，所以不推荐 用来跑sgx
+
+## How to remove sgx
+
+```
+sudo rm /opt/intel/sgxsdk -rf
+```
+
+```bash
+sudo apt remove libsgx-ae-epid libsgx-ae-le libsgx-ae-pce libsgx-ae-qe3 libsgx-ae-qve libsgx-aesm-ecdsa-plugin libsgx-aesm-epid-plugin libsgx-aesm-launch-plugin libsgx-aesm-pce-plugin libsgx-aesm-quote-ex-plugin libsgx-dcap-default-qpl-dev libsgx-dcap-default-qpl libsgx-dcap-ql-dev libsgx-dcap-ql libsgx-enclave-common-dbgsym libsgx-enclave-common-dev libsgx-enclave-common libsgx-epid-dev libsgx-epid libsgx-launch-dev libsgx-launch libsgx-pce-logic libsgx-qe3-logic libsgx-quote-ex-dev libsgx-quote-ex libsgx-uae-service libsgx-urts-dbgsym libsgx-urts sgx-aesm-service libsgx-dcap-quote-verify libsgx-headers
+```
+
+
+
+```bash
+# check if all deb are uninstalled
+sudo apt list --installed | grep sgx
+```
+
+If there still some package not uninstalled, remove it manually
+

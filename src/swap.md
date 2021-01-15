@@ -21,3 +21,7 @@ todo
 第三次选择pid 3里的第一个enclave,
 
 第四次选择pid 4中的第二个enclave
+
+既要轮转pid,又要轮转enclave,最后在enclave内轮转页。一共是三级轮转。
+所以通过开另一个enclave,是很难影响别的enclave。因为别人牺牲一个页，你也要牺牲一个页
+
