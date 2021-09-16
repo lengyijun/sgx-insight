@@ -45,3 +45,7 @@ vma中有一个结构体，指向了自定义的函数。由于缺的页的地�
 有一个get_backing的函数，能在内核中分配可以交换到磁盘的内存页（一般kernel的页是不会交换到磁盘的）
 
 能根据虚拟地址快速定位到backing page的位置
+
+## Q*8: if epc page is swapped out, what happens to the page table entry?
+I guess no change happened.(I'm not sure)
+
