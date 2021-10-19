@@ -126,6 +126,8 @@ prelude () {
 ```xml
 <TCSNum>8</TCSNum>
 ```
+因为merge thread就有4个。
+你可以改源码，把merge thread改成1个。反正4个也没什么用处。
 
 Tantivy需要至少30M内存,内存不足会发生segment fault问题.所以按需求改一下:
 
