@@ -10,6 +10,8 @@ Besides, make sure that you have disabled secure boot in BIOS and enable SGX, fo
 https://community.intel.com/t5/Intel-Software-Guard-Extensions/installing-SGX-driver-for-ubuntu/td-p/1094996
 ```
 
+use `cpuid` to check SGX support.
+
 ## Apt
 
 ```bash
