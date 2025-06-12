@@ -1,0 +1,170 @@
+PCMD: Page Crypto Metadata
+SECS: SGX enclave control structure
+PT: Page Type
+
+sgx只在第6代以上才有
+或者去官网上查
+https://ark.intel.com/content/www/us/en/ark/products/88196/intel-core-i7-6700-processor-8m-cache-up-to-4-00-ghz.html
+
+同一个enclave.signed.so的不同实例在运行时是不可区分的
+
+同一个进程创建许多个enclave,id依次是2,3,4...
+
+一个进程创建的enclave,不能被另一个进程调用,原因是你连id都不知道. id 是进程隔离的
+
+sgx中没有可信的时钟
+
+# 攻击方式
+1. sgx可以被强制停止的攻击方式
+2. 因为是一个.so,所以可以通过多个调用的方式,打乱前面调用的变量什么的.需要开发者小心.其实我觉得根本挡不住
+
+在同一台电脑上,编译几次.so编出来hash值都是一样的,gcc异常的稳定
+.so复制到其他电脑上,也是能运行的
+
+# 生成签名用的私钥
+openssl genrsa -out new.pem -3 3072
+
+xml中开的堆越大,enclave启动越慢.所以要开一个内存正好可用的enclave. 可以用sgx-gdb来测试用了多少内存. 反正上限128M
+
+一个enclave不能访问另一个enclave的内存.但是如果是由同一个线程创建的，可以通过共享一段非EPC的内存。
+不用的sgx要及时destroy掉.省内存
+
+enclave可以被反汇编,所以enclave内部的逻辑是公开的,不能靠在enclave里面藏东西,比如藏算法,藏私钥什么的
+nm enclave.signed.so | grep ecall
+
+# 如何在SGX内部传出一个长度未知的buffer
+在外面开一个1024的buffer,指针传进去. [out,size=1024]
+在SGX里面复制到buffer
+
+SGX可以访问非安全区的内存，标记为[user_check]
+
+unsafe {
+  std::ptr::copy_nonoverlapping(x.as_ptr(), result_string, x.len());
+}
+
+
+sgx的key是key derive key
+sgxfs可以传一个key,也可以用默认的
+如果是默认的derive key就是[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+///use sgx_types::*;
+///println!("{:?}",sgx_key_128bit_t::default(););
+key derive key的算法不公开,但是有很多种实现,也不难做
+
+就算都用默认的密钥[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+把加密的文件复制到另一台电脑,也是打不开的
+
+相同的源代码,在相同的机器上编译几次,enclave.so都是一样的.gcc相当稳定
+
+相同的源代码,在不同的机器上编译几次,enclave.so不同
+所以不同电脑=不同MRENCLAVE
+
+相同enclave.so,用相同pem签名后,enclave.signed.so都是一样的
+
+MRENCLAVE 只和enclave.so有关
+MRSIGNER 只和pem有关
+相同pem=MRSIGNER相同
+相同enclave.so=MRENCLAVE相同
+
+
+# 如果签名用的pem泄漏了
+attestation能被顶替
+能打开sealed的文件
+
+
+MRSIGNER=HASH(ISV public key)
+RPK: Root Provisioning Key(intel会记录)
+RSK: Root Sealing Key(intel不会记录)
+key derivation policy: MRENCLAVE, MRSIGNER and/or the attributes of the enclave
+CPU SVN: processor microcode version
+ISV SVN: enclave software version
+
+iKGF: Intel Key Generation Facility
+HSM: Hardware Security Module 
+
+PSK: Provisioning Seal Key
+
+release的时候,pem必须在whitelist上.需要向intel申请
+
+任何人可以发起远程认证.而且每次远程认证得到的Quote都是一样的.
+Quote(明文)=Report(明文)+签名(EPID签名)
+Quote被上传到intel IAS认证
+Report=MRSIGNER+MRENCLAVE+ISVCPU(microcode)
+
+# Driver
+- 创建Enclave
+- 销毁Enclave
+- 处理SGX的异常,中断,退出
+- 计算MRENCLAVE
+
+# 一般群签名
+## 签名
+群内任何一个人都能产生一个签名
+## 验证
+公开一个群公钥,任何人可以验证这个签名是这个群里的成员签的
+## 群管理者
+能倒查出这个签名是谁签的
+
+# SGX中群签名 EPID
+EPID 与CPU无关,是个协议的设计
+群管理员是intel
+## 签名
+群内任何一个人都能产生一个签名
+## 验证Quote
+上传到Intel验证,因为群公钥不公开.SGX内部知道
+## 群管理者(Intel)
+按照Intel的说法,他是不能倒查出签名者的
+
+凡是被intel签名的特权enclave(比如QE),都能访问Provisioning Seal Key
+因为密封EPID的PSK,是用intel的MRSIGNER派生的
+有3个特权enclave: PE QE LE
+
+# LE
+enclave启动需要EINIT指令,需要一个ETOKEN
+enclave会先加载到LE,LE会检查,然后发一个ETOKEN
+如果以release启动,还会多检查一下签名的key.如果key不在白名单中,就拒绝
+白名单是刻在芯片里的,所以应该很小
+
+
+# PSW
+1. 远程认证的库
+2. PE的实现
+3. QE的实现
+4. LE的实现
+5. ...
+
+之所以非sgx不能产生Quote的原因是,把签名传到Intel的时候,无法验证.
+因为有组公钥
+
+# SGX的三大缺陷
+- 内存小
+- side channel attack
+- 上下文切换慢
+
+# sgx缺少的东西:
+mlock(把page锁在DRAM中，不被交换到swap里)
+madvice
+mincore(判断一个page在DRAM还是swap)
+
+sgx程序一般比普通程序慢2-3倍
+
+# ?
+sgx内置一个椭圆曲线上的点.用来做DH通信
+
+sgx在处理缺页中断的时候，只说明我缺了哪个页，但是不说页上的偏移量
+
+sgx中没有处理panic的钩子，报错打印不出来，所以需要先
+eprintln!("{}",e);
+panic!(e);
+
+/sys/module/isgx
+ksgxswapd
+
+Native
+Scone
+SGX-LKL
+Graphene
+
+sgx分配内存，并不会等到EPC一点都没有了才报内存错误，而是在内存比较少的时候就而开始报错了
+因为page fault handler也需要一定的内存,是2个EPC页
+
+交换出去的页，交换回来的时候，是重新分配一个epc页的，所以位置是不一样的
